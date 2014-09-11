@@ -241,9 +241,9 @@ namespace LibGit2Sharp.Tests
             using (var repo = new Repository(BareTestRepoPath))
             {
                 const string name = "sorry-dude-i-do-not-do-blobs-nor-trees";
-                Assert.Throws<LibGit2SharpException>(() => repo.CreateBranch(name, "refs/tags/point_to_blob"));
+                Assert.Throws<NotFoundException>(() => repo.CreateBranch(name, "refs/tags/point_to_blob"));
                 Assert.Throws<LibGit2SharpException>(() => repo.CreateBranch(name, "53fc32d"));
-                Assert.Throws<LibGit2SharpException>(() => repo.CreateBranch(name, "0266163"));
+                Assert.Throws<NotFoundException>(() => repo.CreateBranch(name, "0266163"));
             }
         }
 
@@ -388,6 +388,34 @@ namespace LibGit2Sharp.Tests
             {
                 Branch trackLocal = repo.Branches["track-local"];
                 Assert.Equal("refs/heads/master", trackLocal.UpstreamBranchCanonicalName);
+            }
+        }
+
+        [Fact]
+        public void QueryRemoteThatCannotBeResolved()
+        {
+            // There is not a Remote to resolve for a local tracking branch.
+            var path = CloneStandardTestRepo();
+
+            var fetchRefSpecs = new string[] { "+refs/remotes/origin/somebranch:refs/heads/somebranch" };
+
+            using (var repo = InitIsolatedRepository(path))
+            {
+                // Update the remote config such that the remote for a
+                // remote branch cannot be resolved
+                Remote remote = repo.Network.Remotes["origin"];
+                Assert.NotNull(remote);
+
+                repo.Network.Remotes.Update(remote, r => r.FetchRefSpecs = fetchRefSpecs);
+
+                Branch branch = repo.Branches["refs/remotes/origin/master"];
+
+                Assert.NotNull(branch);
+                Assert.True(branch.IsRemote);
+
+                // The remote for this branch cannot be resolved -
+                // make sure it returns null (and does not throw).
+                Assert.Null(branch.Remote);
             }
         }
 

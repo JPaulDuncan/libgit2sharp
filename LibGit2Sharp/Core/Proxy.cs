@@ -211,7 +211,7 @@ namespace LibGit2Sharp.Core
                 int res = NativeMethods.git_branch_remote_name(buf, repo, canonical_branch_name);
                 Ensure.Int32Result(res);
 
-                return LaxUtf8Marshaler.FromNative(buf.ptr) ?? string.Empty;
+                return LaxUtf8Marshaler.FromNative(buf.ptr);
             }
         }
 

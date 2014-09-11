@@ -164,11 +164,11 @@ namespace LibGit2Sharp
                 else
                 {
                     remoteName = RemoteNameFromLocalBranch();
+                }
 
-                    if (remoteName == null)
-                    {
-                        return null;
-                    }
+                if (remoteName == null)
+                {
+                    return null;
                 }
 
                 return repo.Network.Remotes[remoteName];
@@ -210,7 +210,14 @@ namespace LibGit2Sharp
 
         private string RemoteNameFromRemoteTrackingBranch()
         {
-            return Proxy.git_branch_remote_name(repo.Handle, CanonicalName);
+            try
+            {
+                return Proxy.git_branch_remote_name(repo.Handle, CanonicalName);
+            }
+            catch (NotFoundException)
+            {
+                return null;
+            }
         }
 
         /// <summary>

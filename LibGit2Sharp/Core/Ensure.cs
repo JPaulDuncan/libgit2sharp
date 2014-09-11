@@ -100,6 +100,7 @@ namespace LibGit2Sharp.Core
                     { GitErrorCode.NonFastForward, (m, r, c) => new NonFastForwardException(m, r, c) },
                     { GitErrorCode.MergeConflict, (m, r, c) => new MergeConflictException(m, r, c) },
                     { GitErrorCode.LockedFile, (m, r, c) => new LockedFileException(m, r, c) },
+                    { GitErrorCode.NotFound, (m, r, c) => new NotFoundException(m, r, c) },
                 };
 
         private static void HandleError(int result)
