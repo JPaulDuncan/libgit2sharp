@@ -203,14 +203,31 @@ namespace LibGit2Sharp.Core
             }
         }
 
-        public static string git_branch_remote_name(RepositorySafeHandle repo, string canonical_branch_name)
+        /// <summary>
+        /// Call into libgit2 to get the remote name that a remote tracking branch
+        /// tracks.
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="canonical_branch_name"></param>
+        /// <param name="throwIfCanNotResolve">Should this method throw if the
+        /// remote cannot be resolved. This only ignores expected libgit2 errors
+        /// including <see cref="GitErrorCode.NotFound"/></param> and 
+        /// <see cref="GitErrorCode.Ambiguous"/>.
+        /// <returns>The remote name if it is found, or null if it cannot be resolved
+        /// and throwIfCannotBeResolved is false.</returns>
+        public static string git_branch_remote_name(RepositorySafeHandle repo, string canonical_branch_name, bool throwIfCanNotResolve)
         {
             using (ThreadAffinity())
             using (var buf = new GitBuf())
             {
                 int res = NativeMethods.git_branch_remote_name(buf, repo, canonical_branch_name);
-                Ensure.Int32Result(res);
+                if (!throwIfCanNotResolve &&
+                    (res == (int)GitErrorCode.NotFound || res == (int)GitErrorCode.Ambiguous))
+                {
+                    return null;
+                }
 
+                Ensure.Int32Result(res);
                 return LaxUtf8Marshaler.FromNative(buf.ptr);
             }
         }

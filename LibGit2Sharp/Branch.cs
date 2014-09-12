@@ -210,14 +210,7 @@ namespace LibGit2Sharp
 
         private string RemoteNameFromRemoteTrackingBranch()
         {
-            try
-            {
-                return Proxy.git_branch_remote_name(repo.Handle, CanonicalName);
-            }
-            catch (NotFoundException)
-            {
-                return null;
-            }
+            return Proxy.git_branch_remote_name(repo.Handle, CanonicalName, false);
         }
 
         /// <summary>
